@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0071CE">
+<title>Walmart — Unclaimed Coupons Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:      #0071CE;
+  --primary-mid:  #0055A6;
+  --primary-deep: #003A75;
+  --primary-tint: #E5F3FF;
+  --primary-pale: #F0F7FF;
+  --yellow:       #FFC220;
+  --yellow-b:     #FFB300;
+  --white:        #FFFFFF;
+  --bg:           #F5F7FB;
+  --ink:          #0A1628;
+  --ink-2:        #3B4F6B;
+  --ink-3:        #7A8FA6;
+  --border:       rgba(0,125,58,0.1);
+  --border-g:     rgba(0,0,0,0.07);
+  --r-md: 14px; --r-lg: 20px; --r-xl: 26px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height:100dvh;overflow-x:hidden;
+}
+
+/* ── DESKTOP GATE ── */
+.d-gate{
+  display:none;position:fixed;inset:0;
+  background:var(--primary-deep);
+  z-index:9999;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:18px;padding:48px 32px;
+}
+.d-gate-icon{font-size:60px}
+.d-gate h2{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--white);letter-spacing:.5px}
+.d-gate h2 span{color:var(--yellow)}
+.d-gate p{font-size:15px;color:rgba(255,255,255,.5);line-height:1.6;max-width:290px}
+@media(min-width:769px){
+  .d-gate{display:flex}
+  .app{display:none!important}
+}
+
+/* ── APP ── */
+.app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative}
+
+/* ── TICKER ── */
+.ticker{background:var(--primary-deep);overflow:hidden;padding:9px 0;flex-shrink:0}
+.ticker-track{display:inline-flex;white-space:nowrap;animation:tickMove 24s linear infinite}
+.t-item{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:0 24px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.6);
+}
+.t-dot{width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0}
+@keyframes tickMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── HERO ── */
+.hero{
+  background:var(--primary);
+  position:relative;overflow:hidden;
+  padding:36px 24px 68px;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:52px;
+  background:var(--bg);clip-path:ellipse(60% 100% at 50% 100%);
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:22px 22px;pointer-events:none;
+}
+.hero-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.hr1{width:300px;height:300px;top:-110px;right:-90px}
+.hr2{width:160px;height:160px;top:-30px;right:20px}
+
+/* logo */
+.logo{
+  display:flex;align-items:center;gap:11px;
+  margin-bottom:24px;position:relative;z-index:1;
+  opacity:0;animation:rise .5s .05s cubic-bezier(.22,1,.36,1) forwards;
+}
+.logo-badge{
+  background:var(--white);width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+/* Walmart logo mark */
+.logo-spark{font-size:24px;line-height:1;color:var(--yellow)}
+.logo-text{display:flex;flex-direction:column;gap:1px}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;color:var(--white);letter-spacing:.3px;line-height:1}
+.logo-sub{font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase}
+
+/* live badge */
+.live-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:6px 14px;margin-bottom:16px;
+  position:relative;z-index:1;
+  opacity:0;animation:rise .5s .15s cubic-bezier(.22,1,.36,1) forwards;
+}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#4DFF9B;animation:livePulse 1.8s ease-in-out infinite}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(77,255,155,.6)}50%{box-shadow:0 0 0 5px rgba(77,255,155,0)}}
+.live-badge span{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:.5px;text-transform:uppercase}
+
+/* headline */
+.hero-hed{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:52px;font-weight:900;line-height:.93;letter-spacing:-.5px;
+  color:var(--white);position:relative;z-index:1;
+  opacity:0;animation:rise .55s .25s cubic-bezier(.22,1,.36,1) forwards;
+}
+.hero-hed em{font-style:normal;color:var(--yellow);display:block;font-size:62px}
+.hero-hed small{font-size:34px;color:rgba(255,255,255,.6)}
+.hero-sub{
+  margin-top:12px;font-size:14px;color:rgba(255,255,255,.65);line-height:1.5;
+  position:relative;z-index:1;
+  opacity:0;animation:rise .5s .35s cubic-bezier(.22,1,.36,1) forwards;
+}
+.hero-sub strong{color:rgba(255,255,255,.9)}
+
+/* ── EMAIL CARD ── */
+.email-card{
+  background:var(--white);border-radius:var(--r-xl);
+  box-shadow:0 16px 48px rgba(0,125,58,.2);
+  margin:-38px 18px 0;padding:24px 20px;
+  position:relative;z-index:10;
+  opacity:0;animation:rise .6s .45s cubic-bezier(.22,1,.36,1) forwards;
+}
+.ec-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:5px}
+.ec-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.2px;margin-bottom:4px}
+.ec-sub{font-size:13px;color:var(--ink-3);margin-bottom:18px;line-height:1.45}
+.ec-sub strong{color:var(--ink-2)}
+
+.email-input{
+  width:100%;height:52px;
+  border:2px solid var(--border-g);border-radius:var(--r-md);
+  padding:0 16px;
+  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);
+  background:var(--bg);outline:none;
+  transition:border-color .2s,background .2s;margin-bottom:10px;
+}
+.email-input:focus{border-color:var(--primary);background:var(--white)}
+.email-input::placeholder{color:var(--ink-3)}
+
+.btn-find{
+  width:100%;height:52px;
+  background:var(--primary);color:var(--white);
+  border:none;border-radius:var(--r-md);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:19px;font-weight:900;letter-spacing:.5px;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-find:active{transform:scale(.98)}
+.btn-find::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
+  transform:translateX(-100%);animation:sheen 2.5s ease-in-out infinite;
+}
+
+/* ── SEARCHING CARD ── */
+.search-card{
+  display:none;background:var(--white);
+  border-radius:var(--r-xl);
+  box-shadow:0 16px 48px rgba(0,125,58,.2);
+  margin:-38px 18px 0;padding:40px 24px 36px;
+  position:relative;z-index:10;text-align:center;
+}
+.s-spinner{
+  width:60px;height:60px;
+  border:3px solid var(--primary-tint);
+  border-top-color:var(--primary);
+  border-radius:50%;animation:spin .7s linear infinite;
+  margin:0 auto 18px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.s-title{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:900;color:var(--ink);margin-bottom:6px}
+.s-email-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--primary-tint);border-radius:50px;
+  padding:5px 14px;margin-top:4px;margin-bottom:16px;
+  font-size:13px;font-weight:700;color:var(--primary);
+}
+.s-rows{display:flex;flex-direction:column;gap:10px;text-align:left}
+.s-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-3)}
+.s-icon{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary-tint);
+  display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;
+}
+.s-row.done{color:var(--ink-2)}
+.s-row.done .s-icon{background:#E5F3FF;color:#16A34A}
+.mini-spin{width:11px;height:11px;border:1.8px solid rgba(0,125,58,.2);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
+
+/* ── MAIN PAGE ── */
+.main-page{display:none}
+
+/* found bar */
+.found-bar{
+  background:var(--primary-pale);
+  border-bottom:1px solid rgba(0,125,58,.1);
+  padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+}
+.found-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--primary);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.found-text strong{display:block;font-size:14px;font-weight:800;color:var(--ink);margin-bottom:1px}
+.found-text span{font-size:12px;color:var(--ink-3)}
+.found-count{
+  margin-left:auto;
+  background:var(--primary);color:var(--white);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:900;
+  padding:4px 12px;border-radius:8px;flex-shrink:0;
+}
+
+/* result hero */
+.result-hero{
+  background:var(--primary);
+  padding:28px 24px 64px;
+  position:relative;overflow:hidden;
+}
+.result-hero::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:48px;
+  background:var(--bg);clip-path:ellipse(58% 100% at 50% 100%);
+}
+.result-hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:22px 22px;pointer-events:none;
+}
+.rh-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.rr1{width:260px;height:260px;top:-90px;right:-80px}
+.rr2{width:120px;height:120px;top:-10px;right:30px}
+.rh-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:5px 13px;margin-bottom:14px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.9);
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.rh-hed{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:42px;font-weight:900;line-height:.95;letter-spacing:-.5px;
+  color:var(--white);margin-bottom:8px;
+}
+.rh-hed em{font-style:normal;color:var(--yellow)}
+.rh-sub{font-size:14px;color:rgba(255,255,255,.65);line-height:1.5}
+
+/* coupon section */
+.coupon-section{padding:28px 18px}
+.cs-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:6px}
+.cs-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--ink);margin-bottom:16px;letter-spacing:-.3px}
+.cs-title span{color:var(--primary)}
+
+.coupon-list{display:flex;flex-direction:column;gap:8px}
+.coupon-item{
+  background:var(--white);border:1px solid var(--border-g);
+  border-radius:var(--r-md);padding:14px 16px;
+  display:flex;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+}
+.coupon-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:4px;background:var(--primary);border-radius:0 2px 2px 0;
+}
+.ci-icon{
+  width:40px;height:40px;border-radius:11px;
+  background:var(--primary-tint);
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.ci-body{flex:1}
+.ci-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.ci-desc{font-size:12px;color:var(--ink-3)}
+.ci-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--primary);flex-shrink:0}
+
+/* steps */
+.steps-section{padding:0 18px 28px}
+.steps{display:flex;flex-direction:column;gap:3px}
+.step{
+  background:var(--white);border:1px solid var(--border-g);
+  border-radius:var(--r-md);padding:16px 14px;
+  display:flex;gap:14px;align-items:flex-start;position:relative;
+}
+.step:not(:last-child)::after{
+  content:'';position:absolute;left:28px;bottom:-11px;
+  width:2px;height:9px;background:var(--border-g);border-radius:2px;
+}
+.step-n{
+  width:40px;height:40px;border-radius:11px;
+  background:var(--primary);color:var(--white);
+  font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step:nth-child(2) .step-n{background:var(--primary-mid)}
+.step:nth-child(3) .step-n{background:var(--primary-deep)}
+.step h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.step p{font-size:12px;color:var(--ink-3);line-height:1.45}
+
+/* sticky CTA */
+.sticky{
+  position:sticky;bottom:0;z-index:100;
+  background:var(--white);border-top:1px solid var(--border-g);
+  padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+}
+.sticky-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;background:var(--primary);color:var(--white);
+  text-decoration:none;border-radius:var(--r-md);
+  padding:16px 18px;position:relative;overflow:hidden;
+  transition:transform .15s;
+  box-shadow:0 8px 24px rgba(0,125,58,.35);
+}
+.sticky-btn:active{transform:scale(.98)}
+.sticky-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 25%,rgba(255,255,255,.12) 50%,transparent 75%);
+  transform:translateX(-100%);animation:sheen 2.5s 1s ease-in-out infinite;
+}
+.sb-left{display:flex;flex-direction:column;gap:1px;text-align:left}
+.sb-main{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;letter-spacing:.3px}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.5)}
+.sb-icon{
+  background:var(--yellow);color:var(--primary-deep);
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;flex-shrink:0;
+  animation:nudge 2s ease-in-out infinite;
+}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+.end-pad{height:120px}
+
+/* ── CARD POPUP ── */
+.overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center}
+.overlay.active{display:flex}
+.backdrop{
+  position:absolute;inset:0;
+  background:rgba(0,40,20,.7);backdrop-filter:blur(4px);
+  animation:fadeIn .3s ease both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sheet{
+  position:relative;z-index:1;background:var(--white);
+  border-radius:28px 28px 0 0;
+  width:100%;max-width:430px;
+  padding:0 0 calc(32px + env(safe-area-inset-bottom));
+  animation:slideUp .45s cubic-bezier(.22,1,.36,1) both;
+  overflow:hidden;
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.drag-handle{width:40px;height:4px;background:rgba(0,0,0,.1);border-radius:2px;margin:14px auto 0}
+
+.card-visual-wrap{padding:20px 20px 0;perspective:900px}
+.card-visual{
+  background:linear-gradient(135deg, #0055A6 0%, #0071CE 45%, #003A75 100%);
+  border-radius:18px;padding:22px 22px 20px;
+  position:relative;overflow:hidden;
+  box-shadow:0 16px 48px rgba(0,125,58,.45);
+  animation:cardEntry .6s .1s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardEntry{
+  from{transform:rotateY(-25deg) scale(.9);opacity:0}
+  to{transform:rotateY(0deg) scale(1);opacity:1}
+}
+.card-visual::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.12) 50%,transparent 70%);
+  transform:translateX(-100%);animation:sheen 3s 1s ease-in-out infinite;
+}
+.card-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.1)}
+.cr1{width:200px;height:200px;top:-80px;right:-60px}
+.cr2{width:100px;height:100px;bottom:-30px;left:20px;background:rgba(255,194,32,.06);border-color:rgba(255,194,32,.15)}
+
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.card-logo-row{display:flex;align-items:center;gap:8px}
+.card-spark-box{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;line-height:1;
+}
+.card-brand{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--white);letter-spacing:.3px}
+.card-type{font-size:9px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;align-self:flex-end}
+
+.card-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.card-amount-row{display:flex;align-items:baseline;gap:3px;margin-bottom:20px}
+.card-cur{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--yellow)}
+.card-num{font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;color:var(--white);line-height:1;letter-spacing:-2px}
+.card-cents{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:rgba(255,255,255,.4)}
+
+.card-footer{display:flex;justify-content:space-between;align-items:flex-end}
+.card-footer-item{display:flex;flex-direction:column;gap:2px}
+.cfi-lbl{font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px}
+.cfi-val{font-size:12px;font-weight:700;color:rgba(255,255,255,.8)}
+.card-chip{
+  width:36px;height:26px;
+  background:linear-gradient(135deg,var(--yellow),var(--yellow-b));
+  border-radius:5px;position:relative;overflow:hidden;
+}
+.card-chip::after{content:'';position:absolute;inset:4px 6px;border:1.5px solid rgba(0,0,0,.15);border-radius:3px}
+
+.sheet-body{padding:22px 20px 0}
+.sheet-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--primary-tint);border-radius:50px;padding:5px 12px;margin-bottom:12px;
+  font-size:11px;font-weight:700;color:var(--primary);letter-spacing:.5px;text-transform:uppercase;
+}
+.sheet-tag-dot{width:7px;height:7px;background:#4DFF9B;border-radius:50%;animation:livePulse 1.5s ease-in-out infinite}
+.sheet-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:30px;font-weight:900;color:var(--ink);
+  letter-spacing:-.3px;line-height:1.05;margin-bottom:6px;
+}
+.sheet-title span{color:var(--primary)}
+.sheet-sub{font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:18px}
+
+.prog-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.prog-txt{font-size:12px;font-weight:600;color:var(--ink-3)}
+.prog-pct{font-size:12px;font-weight:800;color:var(--primary)}
+.prog-bar{height:7px;background:var(--primary-tint);border-radius:50px;overflow:hidden;margin-bottom:18px}
+.prog-fill{height:100%;background:linear-gradient(to right,var(--primary),#0099EE);border-radius:50px;width:0;transition:width 1.3s cubic-bezier(.22,1,.36,1)}
+
+.claim-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;background:var(--primary);color:var(--white);
+  text-decoration:none;border-radius:var(--r-md);padding:17px 20px;
+  position:relative;overflow:hidden;transition:transform .15s;
+  box-shadow:0 8px 28px rgba(0,125,58,.4);
+}
+.claim-btn:active{transform:scale(.98)}
+.claim-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 25%,rgba(255,255,255,.14) 50%,transparent 75%);
+  transform:translateX(-100%);animation:sheen 2s ease-in-out infinite;
+}
+.cb-left{display:flex;flex-direction:column;gap:2px;text-align:left}
+.cb-main{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;letter-spacing:.3px}
+.cb-sub{font-size:11px;color:rgba(255,255,255,.55)}
+.cb-arrow{
+  background:var(--yellow);color:var(--primary-deep);
+  width:38px;height:38px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;flex-shrink:0;
+  animation:nudge 2s ease-in-out infinite;
+}
+
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sheen{0%{transform:translateX(-100%)}45%,100%{transform:translateX(220%)}}
+.reveal{
+  opacity:0;transform:translateY(20px);
+  transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1);
+}
+.reveal.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="d-gate">
+  <div class="d-gate-icon">📱</div>
+  <h2>Mobile <span>only</span></h2>
+  <p>Open this page on your phone to check for unused Walmart coupons in your account.</p>
+</div>
+
+<div class="app">
+
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="t-item"><span class="t-dot"></span>Unused Coupons Found</span>
+      <span class="t-item"><span class="t-dot"></span>Claim Before They Expire</span>
+      <span class="t-item"><span class="t-dot"></span>Walmart Rewards/span>
+      <span class="t-item"><span class="t-dot"></span>Check Your Account</span>
+      <span class="t-item"><span class="t-dot"></span>Free Savings Waiting</span>
+      <span class="t-item"><span class="t-dot"></span>Unused Coupons Found</span>
+      <span class="t-item"><span class="t-dot"></span>Claim Before They Expire</span>
+      <span class="t-item"><span class="t-dot"></span>Walmart Rewards/span>
+      <span class="t-item"><span class="t-dot"></span>Check Your Account</span>
+      <span class="t-item"><span class="t-dot"></span>Free Savings Waiting</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-ring hr1"></div>
+    <div class="hero-ring hr2"></div>
+    <div class="logo">
+      <div class="logo-badge"><span class="logo-spark">✦</span></div>
+      <div class="logo-text">
+        <div class="logo-name">Walmart</div>
+        <div class="logo-sub">Rewards &amp; Coupons</div>
+      </div>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div><span>Coupons expiring soon</span></div>
+    <h1 class="hero-hed">
+      <small>Check your</small>
+      <em>unused</em>
+      coupons
+    </h1>
+    <p class="hero-sub">Enter your Walmart email below and we'll <strong>instantly find all unclaimed coupons</strong> linked to your account.</p>
+  </div>
+
+  <!-- SCREEN A: EMAIL -->
+  <div class="email-card" id="screen-email">
+    <div class="ec-label">Find My Coupons</div>
+    <div class="ec-title">Enter your email address</div>
+    <p class="ec-sub">We'll scan your Walmart account for <strong>unused coupons</strong> linked to your email.</p>
+    <input class="email-input" id="email-input" type="email" inputmode="email" placeholder="yourname@email.com" autocomplete="email">
+    <button class="btn-find" id="btn-find">🔍 Find My Coupons</button>
+  </div>
+
+  <!-- SCREEN B: SEARCHING -->
+  <div class="search-card" id="screen-search">
+    <div class="s-spinner"></div>
+    <div class="s-title">Scanning your account…</div>
+    <div class="s-email-pill">✉️ <span id="email-display">—</span></div>
+    <div class="s-rows">
+      <div class="s-row" id="sr1"><div class="s-icon"><div class="mini-spin"></div></div><span>Locating your Walmart account</span></div>
+      <div class="s-row" id="sr2"><div class="s-icon">·</div><span>Scanning for unused coupons</span></div>
+      <div class="s-row" id="sr3"><div class="s-icon">·</div><span>Calculating total coupon value</span></div>
+    </div>
+  </div>
+
+  <!-- SCREEN C: MAIN PAGE -->
+  <div class="main-page" id="screen-main">
+
+    <div class="found-bar reveal">
+      <div class="found-icon">🏷️</div>
+      <div class="found-text">
+        <strong>Unused coupons found</strong>
+        <span id="found-email-display">your account</span>
+      </div>
+      <div class="found-count" id="found-count">7</div>
+    </div>
+
+    <div class="result-hero">
+      <div class="rh-ring rr1"></div>
+      <div class="rh-ring rr2"></div>
+      <div class="rh-eyebrow">💰 Available to claim</div>
+      <h2 class="rh-hed">Your unclaimed<br>coupon value is<br><em id="rh-amount">$0</em></h2>
+      <p class="rh-sub">These coupons are still active and waiting to be claimed to your account.</p>
+    </div>
+
+    <div class="coupon-section reveal">
+      <div class="cs-label">Unclaimed coupons</div>
+      <h3 class="cs-title">Found in <span>your account</span></h3>
+      <div class="coupon-list" id="coupon-list"></div>
+    </div>
+
+    <div class="steps-section reveal">
+      <div class="cs-label" style="padding:0 0 6px">How to claim</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><h3>Tap Claim My Coupons</h3><p>Hit the button below to open your personalised coupon redemption page.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h3>Verify your account</h3><p>Confirm your Walmart account details to unlock the full coupon value.</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h3>Save on your next shop</h3><p>Coupons apply automatically at checkout — in-store or online.</p></div></div>
+      </div>
+    </div>
+
+    <div class="end-pad"></div>
+
+    <div class="sticky">
+      <a href="https://giftclick.org/aff_c?offer_id=1157&aff_id=38845&source=wm" class="sticky-btn">
+        <div class="sb-left">
+          <span class="sb-main">Claim My Coupons</span>
+          <span class="sb-sub">Tap to redeem your savings</span>
+        </div>
+        <div class="sb-icon">›</div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+  <div class="backdrop" id="backdrop"></div>
+  <div class="sheet">
+    <div class="drag-handle"></div>
+    <div class="card-visual-wrap">
+      <div class="card-visual">
+        <div class="card-ring cr1"></div>
+        <div class="card-ring cr2"></div>
+        <div class="card-top">
+          <div class="card-logo-row">
+            <div class="card-spark-box"><span style="color:var(--yellow);font-size:22px;font-weight:900;font-family:serif">✦</span></div>
+            <div class="card-brand">Walmart</div>
+          </div>
+          <div class="card-type">Rewards Card</div>
+        </div>
+        <div class="card-lbl">Total Coupon Value</div>
+        <div class="card-amount-row">
+          <span class="card-cur">$</span>
+          <span class="card-num" id="popup-num">0</span>
+          <span class="card-cents">.00</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-footer-item"><span class="cfi-lbl">Account</span><span class="cfi-val" id="popup-email-short">—</span></div>
+          <div class="card-footer-item" style="text-align:center"><span class="cfi-lbl">Status</span><span class="cfi-val" style="color:#4DFF9B">✓ Active</span></div>
+          <div class="card-chip"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-tag"><div class="sheet-tag-dot"></div> Coupons ready to claim</div>
+      <div class="sheet-title">You've got <span id="popup-amount-text">$0</span><br>waiting for you</div>
+      <p class="sheet-sub">These unclaimed Walmart coupons are linked to your account and expire soon. Claim them before they're gone.</p>
+      <div class="prog-row">
+        <span class="prog-txt">Coupons being claimed</span>
+        <span class="prog-pct" id="popup-pct">—</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="popup-prog"></div></div>
+      <a href="https://giftclick.org/aff_c?offer_id=1157&aff_id=38845&source=wm" class="claim-btn">
+        <div class="cb-left">
+          <span class="cb-main">Claim My Coupons Now</span>
+          <span class="cb-sub">Takes under 60 seconds</span>
+        </div>
+        <div class="cb-arrow">›</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const AFFILIATE = 'https://giftclick.org/aff_c?offer_id=1157&aff_id=38845&source=wm';
+
+const COUPON_POOL = [
+  {icon:'🛒',name:'Grocery & Fresh Food',  desc:'Everyday essentials & fresh produce', vals:[40,50,45,55,38]},
+  {icon:'🥩',name:'Meat & Fish',           desc:'Fresh cuts, poultry & seafood',        vals:[35,40,30,45,38]},
+  {icon:'🧴',name:'Health & Beauty',       desc:'Personal care & pharmacy',             vals:[25,30,35,20,28]},
+  {icon:'🍷',name:'Drinks',                desc:'Beer, wine, spirits & soft drinks',    vals:[30,25,35,40,30]},
+  {icon:'🏠',name:'Home & Garden',         desc:'Cleaning, storage & décor',            vals:[50,45,55,60,48]},
+  {icon:'👕',name:'George Clothing',       desc:'Fashion for the whole family',         vals:[35,40,30,45,38]},
+  {icon:'🍼',name:'Baby & Toddler',        desc:'Nappies, food & essentials',           vals:[30,28,35,32,25]},
+  {icon:'🐾',name:'Pet Care',              desc:'Food, treats & accessories',           vals:[25,20,30,28,22]},
+  {icon:'❄️',name:'Frozen Food',           desc:'Meals, desserts & frozen veg',         vals:[30,35,25,40,28]},
+];
+
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return Math.abs(h)}
+function seededRand(seed,min,max){const x=Math.sin(seed+1)*10000;return min+Math.floor((x-Math.floor(x))*(max-min+1))}
+function maskEmail(e){const[u,d]=e.split('@');if(!d)return e;return u.slice(0,2)+'***@'+d}
+function countUp(el,from,to,dur){const start=performance.now();const ease=t=>1-Math.pow(1-t,4);(function step(ts){const p=Math.min((ts-start)/dur,1);el.textContent=Math.round(from+ease(p)*(to-from));if(p<1)requestAnimationFrame(step)})(performance.now())}
+function isEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())}
+
+const emailInput=document.getElementById('email-input');
+document.getElementById('btn-find').addEventListener('click',startSearch);
+emailInput.addEventListener('keydown',e=>{if(e.key==='Enter')startSearch()});
+
+function startSearch(){
+  const email=emailInput.value.trim();
+  if(!isEmail(email)){emailInput.style.borderColor='#E53E3E';emailInput.focus();setTimeout(()=>emailInput.style.borderColor='',900);return}
+  document.getElementById('email-display').textContent=email;
+  document.getElementById('screen-email').style.display='none';
+  document.getElementById('screen-search').style.display='block';
+  document.getElementById('screen-search').scrollIntoView({behavior:'smooth',block:'start'});
+  const rows=['sr1','sr2','sr3'],starts=[0,950,1850],ends=[750,1600,2700];
+  rows.forEach((id,i)=>{
+    setTimeout(()=>{const el=document.getElementById(id);el.classList.add('active');el.querySelector('.s-icon').innerHTML='<div class="mini-spin"></div>'},starts[i]);
+    setTimeout(()=>{const el=document.getElementById(id);el.classList.remove('active');el.classList.add('done');el.querySelector('.s-icon').textContent='✓'},ends[i]);
+  });
+  setTimeout(()=>showResult(email),3200);
+}
+
+function showResult(email){
+  const seed=hashStr(email);
+  const amount=seededRand(seed,400,600);
+  const pct=seededRand(seed+1,74,91);
+  const couponCount=seededRand(seed+2,5,9);
+  const shuffled=[...COUPON_POOL].sort(()=>hashStr(email+Math.random())-.5);
+  const chosen=shuffled.slice(0,couponCount);
+  let remaining=amount;
+  const values=chosen.map((c,i)=>{
+    if(i===chosen.length-1)return remaining;
+    const v=seededRand(seed+i+10,15,Math.min(80,remaining-(chosen.length-i-1)*15));
+    remaining-=v;return v;
+  });
+  document.getElementById('found-email-display').textContent=maskEmail(email);
+  document.getElementById('found-count').textContent=couponCount;
+  document.getElementById('rh-amount').textContent='$'+amount;
+  const list=document.getElementById('coupon-list');
+  list.innerHTML='';
+  chosen.forEach((c,i)=>{
+    const el=document.createElement('div');
+    el.className='coupon-item reveal';
+    el.innerHTML=`<div class="ci-icon">${c.icon}</div><div class="ci-body"><div class="ci-name">${c.name}</div><div class="ci-desc">${c.desc}</div></div><div class="ci-val">$${values[i]}</div>`;
+    list.appendChild(el);
+  });
+  document.getElementById('screen-search').style.display='none';
+  document.getElementById('screen-main').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>document.querySelectorAll('.reveal').forEach(el=>el.classList.add('on')),100);
+  setTimeout(()=>showPopup(email,amount,pct),900);
+}
+
+function showPopup(email,amount,pct){
+  document.getElementById('popup-pct').textContent=pct+'%';
+  document.getElementById('popup-email-short').textContent=maskEmail(email);
+  document.getElementById('popup-amount-text').textContent='$'+amount;
+  document.getElementById('overlay').classList.add('active');
+  requestAnimationFrame(()=>setTimeout(()=>{
+    document.getElementById('popup-prog').style.width=pct+'%';
+    countUp(document.getElementById('popup-num'),0,amount,1500);
+  },150));
+}
+
+document.getElementById('backdrop').addEventListener('click',()=>document.getElementById('overlay').classList.remove('active'));
+
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+document.querySelectorAll('.claim-btn,.sticky-btn,.btn-find').forEach(el=>{
+  el.addEventListener('click',function(e){
+    const r=document.createElement('span');
+    const rect=this.getBoundingClientRect();
+    const sz=Math.max(rect.width,rect.height)*2.4;
+    Object.assign(r.style,{position:'absolute',borderRadius:'50%',width:sz+'px',height:sz+'px',left:(e.clientX-rect.left-sz/2)+'px',top:(e.clientY-rect.top-sz/2)+'px',background:'rgba(255,255,255,.18)',transform:'scale(0)',pointerEvents:'none',transition:'transform .5s ease,opacity .5s ease',opacity:'1',zIndex:'10'});
+    this.style.position='relative';this.style.overflow='hidden';this.appendChild(r);
+    requestAnimationFrame(()=>{r.style.transform='scale(1)';r.style.opacity='0'});
+    setTimeout(()=>r.remove(),550);
+  });
+});
+</script>
+</body>
+</html>
